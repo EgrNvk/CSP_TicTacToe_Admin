@@ -100,6 +100,13 @@ class AdminView:
         )
         self.logout_button.pack(side="right")
 
+        self.users_button = tk.Button(
+            self.top_frame,
+            text="Усі користувачі",
+            width=16
+        )
+        self.users_button.pack(side="right", padx=(0, 10))
+
 
         self.sessions_frame = tk.Frame(self.main_frame)
         self.sessions_frame.pack(fill="both", expand=True, pady=(0, 10))
@@ -220,6 +227,37 @@ class AdminView:
         self.sessions_text.delete("1.0", tk.END)
         self.sessions_text.insert(tk.END, text)
         self.sessions_text.config(state="disabled")
+
+
+    def show_users_window(self, users):
+        win = tk.Toplevel(self.root)
+        win.title("Зареєстровані користувачі")
+        win.geometry("320x400")
+        win.resizable(False, True)
+
+        tk.Label(
+            win,
+            text="Зареєстровані користувачі:",
+            font=("Arial", 12, "bold")
+        ).pack(anchor="w", padx=15, pady=(15, 5))
+
+        frame = tk.Frame(win)
+        frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+
+        text = tk.Text(frame, state="disabled")
+        text.pack(fill="both", expand=True)
+
+        if not users:
+            content = "Користувачів немає"
+        else:
+            content = "\n".join(
+                f"{i}. {user.get('login', '-')}"
+                for i, user in enumerate(users, start=1)
+            )
+
+        text.config(state="normal")
+        text.insert(tk.END, content)
+        text.config(state="disabled")
 
 
     def update_player_menu(self, players):

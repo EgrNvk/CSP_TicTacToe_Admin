@@ -14,6 +14,7 @@ class AdminController:
         self.view.logout_button.config(command=self.logout)
         self.view.kick_button.config(command=self.kick_player)
         self.view.end_session_button.config(command=self.close_session)
+        self.view.users_button.config(command=self.show_users)
 
         self.view.show_login_frame()
 
@@ -46,6 +47,15 @@ class AdminController:
 
         self.refresh_sessions()
 
+    def show_users(self):
+        response = self.model.get_users()
+
+        if not response or response.get("type") != "users_list":
+            self.view.set_action_status("Помилка отримання списку користувачів")
+            return
+
+        users = response.get("users", [])
+        self.view.show_users_window(users)
 
     def refresh_sessions(self):
         response = self.model.get_sessions()

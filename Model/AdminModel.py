@@ -119,3 +119,14 @@ class AdminModel:
         })
 
         return self.recv_json()
+
+    def get_users(self):
+        self.send_json({
+            "type": "get_users"
+        })
+
+        response = self.recv_json()
+        if not response:
+            return None
+
+        return response
