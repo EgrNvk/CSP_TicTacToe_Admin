@@ -1,4 +1,5 @@
 import hashlib
+from tkinter import messagebox
 
 
 class AdminController:
@@ -55,7 +56,34 @@ class AdminController:
             return
 
         users = response.get("users", [])
-        self.view.show_users_window(users)
+        self.view.show_users_window(users, self.show_user_history)
+
+    def show_user_history(self, login):
+        response = self.model.get_user_history(login)
+
+        if not response or response.get("type") != "user_history":
+            messagebox.showerror("Помилка", f"Не вдалося отримати історію для {login}")
+            return
+
+        history = response.get("history", [])
+
+        if not history:
+            messagebox.showinfo("Історія ігор", f"Гравець {login} ще не зіграв жодної гри.")
+            return
+
+        lines = [f"Історія ігор: {login}\n"]
+        for entry in history:
+            result_ua = {"win": "Перемога", "loss": "Поразка", "draw": "Нічия"}.get(
+                entry.get("result", ""), entry.get("result", "")
+            )
+            lines.append(
+                f"[{entry.get('played_at', '')}]  "
+                f"Гра #{entry.get('game_id', '')}  |  "
+                f"Суперник: {entry.get('opponent_login', '')}  |  "
+                f"{result_ua}"
+            )
+
+        messagebox.showinfo("Історія ігор", "\n".join(lines))
 
     def refresh_sessions(self):
         response = self.model.get_sessions()

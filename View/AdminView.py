@@ -229,10 +229,10 @@ class AdminView:
         self.sessions_text.config(state="disabled")
 
 
-    def show_users_window(self, users):
+    def show_users_window(self, users, on_history_click):
         win = tk.Toplevel(self.root)
         win.title("Зареєстровані користувачі")
-        win.geometry("320x400")
+        win.geometry("320x430")
         win.resizable(False, True)
 
         tk.Label(
@@ -241,23 +241,35 @@ class AdminView:
             font=("Arial", 12, "bold")
         ).pack(anchor="w", padx=15, pady=(15, 5))
 
-        frame = tk.Frame(win)
-        frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+        list_frame = tk.Frame(win)
+        list_frame.pack(fill="both", expand=True, padx=15, pady=(0, 10))
 
-        text = tk.Text(frame, state="disabled")
-        text.pack(fill="both", expand=True)
+        scrollbar = tk.Scrollbar(list_frame)
+        scrollbar.pack(side="right", fill="y")
+
+        listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set, font=("Arial", 11))
+        listbox.pack(fill="both", expand=True)
+        scrollbar.config(command=listbox.yview)
 
         if not users:
-            content = "Користувачів немає"
+            listbox.insert(tk.END, "Користувачів немає")
         else:
-            content = "\n".join(
-                f"{i}. {user.get('login', '-')}"
-                for i, user in enumerate(users, start=1)
-            )
+            for user in users:
+                listbox.insert(tk.END, user.get("login", "-"))
 
-        text.config(state="normal")
-        text.insert(tk.END, content)
-        text.config(state="disabled")
+        def on_click():
+            selection = listbox.curselection()
+            if not selection:
+                return
+            login = listbox.get(selection[0])
+            on_history_click(login)
+
+        tk.Button(
+            win,
+            text="Показати історію",
+            width=20,
+            command=on_click
+        ).pack(pady=(0, 15))
 
 
     def update_player_menu(self, players):

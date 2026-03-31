@@ -130,3 +130,15 @@ class AdminModel:
             return None
 
         return response
+
+    def get_user_history(self, login):
+        self.send_json({
+            "type": "get_user_history",
+            "login": login
+        })
+
+        response = self.recv_json()
+        if not response:
+            return None
+
+        return response
