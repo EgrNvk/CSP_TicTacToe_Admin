@@ -142,3 +142,10 @@ class AdminModel:
             return None
 
         return response
+
+    def get_game_moves(self, game_id):
+        self.send_json({
+            "type": "get_game_moves",
+            "game_id": game_id
+        })
+        return self.recv_json()

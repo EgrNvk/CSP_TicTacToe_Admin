@@ -56,34 +56,44 @@ class AdminController:
             return
 
         users = response.get("users", [])
-        self.view.show_users_window(users, self.show_user_history)
+        self.view.show_users_window(
+            users,
+            self.get_user_games,
+            self.get_game_moves
+        )
 
-    def show_user_history(self, login):
+    def get_user_games(self, login):
         response = self.model.get_user_history(login)
 
         if not response or response.get("type") != "user_history":
-            messagebox.showerror("Помилка", f"Не вдалося отримати історію для {login}")
-            return
+            return []
 
         history = response.get("history", [])
 
-        if not history:
-            messagebox.showinfo("Історія ігор", f"Гравець {login} ще не зіграв жодної гри.")
-            return
+        result_map = {
+            "win": "Перемога",
+            "loss": "Поразка",
+            "draw": "Нічия"
+        }
 
-        lines = [f"Історія ігор: {login}\n"]
+        games = []
         for entry in history:
-            result_ua = {"win": "Перемога", "loss": "Поразка", "draw": "Нічия"}.get(
-                entry.get("result", ""), entry.get("result", "")
-            )
-            lines.append(
-                f"[{entry.get('played_at', '')}]  "
-                f"Гра #{entry.get('game_id', '')}  |  "
-                f"Суперник: {entry.get('opponent_login', '')}  |  "
-                f"{result_ua}"
-            )
+            games.append({
+                "game_id": entry.get("game_id"),
+                "opponent": entry.get("opponent_login"),
+                "result": result_map.get(entry.get("result"), entry.get("result")),
+                "played_at": entry.get("played_at", "")
+            })
 
-        messagebox.showinfo("Історія ігор", "\n".join(lines))
+        return games
+
+    def get_game_moves(self, game_id):
+        response = self.model.get_game_moves(game_id)
+
+        if not response or response.get("type") != "game_moves":
+            return []
+
+        return response.get("moves", [])
 
     def refresh_sessions(self):
         response = self.model.get_sessions()
